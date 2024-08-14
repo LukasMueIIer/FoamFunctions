@@ -3,6 +3,7 @@ import os
 import inspect
 from PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
 from PyFoam.Execution.BasicRunner import BasicRunner
+from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
 import shutil
 
 def get_start_path():   
@@ -60,3 +61,17 @@ def paraFoam(dir_path,silent=True,vtk=True):    #basic paraFoam runner that touc
             print(f"paraFoam ran successfully")
         else:
             print(f"paraFoam failed for case")
+
+def decompose(dir_path,core_count,silent=True):    #basic case decomposer that adapts the decomposePar file as well
+    #modify file
+    dire = SolutionDirectory(dir_path)
+    dP_file = ParsedParameterFile(dire.systemDir() + "/decomposeParDict")
+    dP_file["numberOfSubdomains"] = str(core_count)
+    dP_file.writeFile()
+    #execite decomposition
+    decompose_runner = BasicRunner(argv=["decomposePar", "-case", dir_path, "-force"], silent=silent)
+    decompose_runner.start()
+    if decompose_runner.runOK():
+        print("decomposePar completed successfully.")
+    else:
+        print("decomposePar failed.")
