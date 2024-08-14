@@ -18,4 +18,4 @@ def find_lokalPeaks(data, window = 1):
         if np.all(data[i] > data[i-window:i]) and np.all(data[i] > data[i+1:i+1+window]):
             local_maxima_indices.append(i)
     
-    return local_maxima_indices
+    return np.array(local_maxima_indices)
