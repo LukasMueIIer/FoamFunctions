@@ -21,9 +21,33 @@ def clean_parallel_and_postProcessing(dir_path):
         shutil.rmtree(post_processing_dir)
 
 def run_Blockmesh(dir_path,silent=True): #basic BlockMesh execution with no addons
-    bm_runner = BasicRunner(argv=["blockMesh","-case",dir_path],silent=False)
+    bm_runner = BasicRunner(argv=["blockMesh","-case",dir_path],silent=silent)
     bm_runner.start()
     if bm_runner.runOK():
         print(f"blockMesh ran successfully")
     else:
         print(f"blockMesh failed for case")
+
+def renumber_Mesh(dir_path,silent=True):    #basic renumber mesh 
+    rm_runner = BasicRunner(argv=["renumberMesh","-case",dir_path,"-overwrite"],silent=False)
+    rm_runner.start()
+    if rm_runner.runOK():
+        print(f"renumberMesh ran successfully")
+    else:
+        print(f"renumberMesh failed for case")
+
+def paraFoam(dir_path,silent=True,vtk=True):    #basic paraFoam runner that touches and uses vtk (if activated)
+    if(vtk):
+        pf_runner = BasicRunner(argv=["paraFoam","-case",dir_path,"-touch","-vtk"],silent=silent)
+        pf_runner.start()
+        if pf_runner.runOK():
+            print(f"paraFoam ran successfully")
+        else:
+            print(f"paraFoam failed for case")
+    else:
+        pf_runner = BasicRunner(argv=["paraFoam","-case",dir_path,"-touch"],silent=silent)
+        pf_runner.start()
+        if pf_runner.runOK():
+            print(f"paraFoam ran successfully")
+        else:
+            print(f"paraFoam failed for case")
