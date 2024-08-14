@@ -1,12 +1,21 @@
 #generally helpfull tools that fit no specific category
 import os
+import inspect
 from PyFoam.RunDictionary.SolutionDirectory import SolutionDirectory
 from PyFoam.Execution.BasicRunner import BasicRunner
 import shutil
 
 def get_start_path():   
     #returns the path of the folder where the file that was used to start this current python process is located
-    return os.path.dirname(os.path.realpath(__file__))
+    # Get the file path of the script that called this function
+    caller_frame = inspect.stack()[1]
+    caller_file = caller_frame.filename
+    
+    # Get the directory of the caller file
+    start_path = os.path.dirname(os.path.realpath(caller_file))
+    
+    return start_path
+
 
 def clean_parallel_and_postProcessing(dir_path):
     #cleans up a case that was run in parallel and also removes the postProcessing dictionary
