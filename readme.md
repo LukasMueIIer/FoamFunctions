@@ -22,6 +22,9 @@ Functions to extract data from files that are created by OpenFoam. This data can
 ### Data Processing
 Functions that can manipulate and extract information from data
 
+### general tools
+Just usefull little tools that fit no specific category
+
 
 ## Installation
 Navigato to this directory with the environment sources in which to install this package.
