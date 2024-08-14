@@ -1,0 +1,7 @@
+pyproject.toml
+FoamFunctions/__init__.py
+FoamFunctions.egg-info/PKG-INFO
+FoamFunctions.egg-info/SOURCES.txt
+FoamFunctions.egg-info/dependency_links.txt
+FoamFunctions.egg-info/requires.txt
+FoamFunctions.egg-info/top_level.txt
