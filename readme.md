@@ -25,6 +25,9 @@ Functions that can manipulate and extract information from data
 ### general tools
 Just usefull little tools that fit no specific category
 
+### fluid calcs
+Functions to perform small calculations regarding fluid mechanics. e.g. calculate the Re-Number
+
 
 ## Installation
 Navigato to this directory with the environment sources in which to install this package.
