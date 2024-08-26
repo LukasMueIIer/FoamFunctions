@@ -34,7 +34,7 @@ Functions to perform small calculations regarding fluid mechanics. e.g. calculat
 
 ## Solvers
 ### Sim_Master
-provides a class that makes executing and chaining solvers easier
+provides a class that makes executing and chaining solvers easier, runs are defined as sim_step class and then executed via the sim_master
 
 ## Installation
 Navigato to this directory with the environment sources in which to install this package.
