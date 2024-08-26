@@ -46,6 +46,7 @@ class sim_master:
 
         #change time scheme if required
         if sim.ddTSchemes is not None:
+            #TODO maybe add a check if ddTScheme is valid, but no clue how to do this in a robust way
             fv_file = ParsedParameterFile(dire.systemDir() + "/fvSchemes")
             fv_file["ddtSchemes"]["default"] = sim.ddTSchemes
             fv_file.writeFile()
