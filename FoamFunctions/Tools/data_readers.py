@@ -20,7 +20,7 @@ def readCD_last(file_path):
     except Exception as e:
         print(f"An error occurred: {e}")
         return None
-    
+
 def readCD_all(file_path,start_at = 14):
     #function to read the result file of the forces function objective
     #reads all values after start_at and writes them into an array that is returned

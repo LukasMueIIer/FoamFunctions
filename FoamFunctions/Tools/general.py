@@ -92,3 +92,26 @@ def reconstruct(dir_path,silent=True):  #basic reconstruction of a parallel case
         print("reconstructPar ran successfully")
     else:
         print("reconstructPar failed for case")    
+
+def find_largest_numbered_directory(dir_path):
+    #finds the directory with the largest numerical value in the dir_path folder
+
+    # List all folders in the directory
+    folders = [f for f in os.listdir(dir_path) if os.path.isdir(os.path.join(dir_path, f))]
+
+    # Filter out non-integer folder names and convert to integers
+    folder_numbers = [int(f) for f in folders if f.isdigit()]
+
+    # Initialize largest_folder_path to None in case no valid folder is found
+    largest_folder_path = None
+
+    # Find the folder with the largest number
+    if folder_numbers:
+        largest_folder = str(max(folder_numbers))
+
+        # Construct the path to the largest numbered folder
+        largest_folder_path = os.path.join(dir_path, largest_folder)
+    else:
+        print("No folders with integer names found.")
+
+    return largest_folder_path
