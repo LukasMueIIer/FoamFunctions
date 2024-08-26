@@ -8,6 +8,9 @@ Contains functions that create fully usable meshes for special usecases
 ### Tools
 Contains small helper functions to aid with various tasks
 
+### Solvers
+Contains tools and classes related to running solvers
+
 
 
 
@@ -28,6 +31,10 @@ Just usefull little tools that fit no specific category
 ### fluid calcs
 Functions to perform small calculations regarding fluid mechanics. e.g. calculate the Re-Number
 
+
+## Solvers
+### Sim_Master
+provides a class that makes executing and chaining solvers easier
 
 ## Installation
 Navigato to this directory with the environment sources in which to install this package.
