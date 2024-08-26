@@ -13,7 +13,7 @@ class sim_step:
         self.solver = solver #String which matches the Foam Command to execute the solver
         self.silent = silent #If solver output is shown in console
         self.ddTSchemes = ddTSchemes    #to swap between time schemes before execution
-        self.steady_state_solvers = ["simpleFoam", "buoyantSimpleFoam", "potentialFoam", "porousSimpleFoam"] #List of common steady state solvers
+        
 
     def inverval_splitting(self,n): #sets the writeInterval, so that n files are written
         self.writeInterval = self.time / n
@@ -26,6 +26,7 @@ class sim_master:
         self.solverEndtimes = []    #simulation time until which solver was executed
         self.solverExecutionTimes = [] #physical duration which solver took to be executed
         self.dir_path = dir_path #simulation directory
+        self.steady_state_solvers = ["simpleFoam", "buoyantSimpleFoam", "potentialFoam", "porousSimpleFoam"] #List of common steady state solvers
 
     def execute(self,sim: sim_step): #execute a simulation defined as sim_step class
         dire = SolutionDirectory(self.dir_path)
@@ -50,7 +51,10 @@ class sim_master:
             fv_file.writeFile()
 
         #check if a steady state solver has a steady state ddT
-
+        if any(solver_name in sim.solver for solver_name in self.steady_state_solvers): #check if we are a steady solver
+            print(f"{sim.solver} is a steady-state solver.")
+            if (fv_file["ddtSchemes"]["default"] != "steadyState"): #check if we have a steady state scheme
+                print("WARNING!!! steady state solver detected, but no steady state scheme used")
 
         #run solver and measure time
         start_time = time.time()
