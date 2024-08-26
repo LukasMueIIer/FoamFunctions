@@ -6,13 +6,15 @@ from PyFoam.Execution.BasicRunner import BasicRunner
 import time
 
 class sim_step:
-    def __init__(self,solver,time = 1, writeInterval = 1, dT = 1, silent=True) -> None:
+    def __init__(self,solver,time = 1, writeInterval = 1, dT = 1, silent=True, ddTSchemes = None) -> None:
         self.time = time #timeframe which is simulated
         self.writeInterval = writeInterval #at what interval results are written
         self.dT = dT    #timestep size (or initial size if addaptive timestep)
         self.solver = solver #String which matches the Foam Command to execute the solver
         self.silent = silent #If solver output is shown in console
-        
+        self.ddTSchemes = ddTSchemes    #to swap between time schemes before execution
+        self.steady_state_solvers = ["simpleFoam", "buoyantSimpleFoam", "potentialFoam", "porousSimpleFoam"] #List of common steady state solvers
+
     def inverval_splitting(self,n): #sets the writeInterval, so that n files are written
         self.writeInterval = self.time / n
 
@@ -33,11 +35,22 @@ class sim_master:
         cD_file["application"] = sim.solver
         if(len(self.solverEndtimes == 0)):
             cD_file["endTime"]  = str(sim.time)
+            self.solverEndtimes.append(sim.time)
         else:
             cD_file["endTime"]  = str(sim.time + self.solverEndtimes[-1])
+            self.solverEndtimes.append(sim.time + self.solverEndtimes[-1])
         cD_file["writeInterval"] = sim.writeInterval
         cD_file["deltaT"] = sim.dT
         cD_file.writeFile()
+
+        #change time scheme if required
+        if sim.ddTSchemes is not None:
+            fv_file = ParsedParameterFile(dire.systemDir() + "/fvSchemes")
+            fv_file["ddtSchemes"]["default"] = sim.ddTSchemes
+            fv_file.writeFile()
+
+        #check if a steady state solver has a steady state ddT
+
 
         #run solver and measure time
         start_time = time.time()
@@ -53,5 +66,6 @@ class sim_master:
         
         #save information
         self.solverExecutionTimes.append(exec_time)
+        
 
 
