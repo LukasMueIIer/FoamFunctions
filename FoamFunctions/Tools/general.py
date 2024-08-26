@@ -75,3 +75,12 @@ def decompose(dir_path,core_count,silent=True):    #basic case decomposer that a
         print("decomposePar completed successfully.")
     else:
         print("decomposePar failed.")
+
+def reconstruct(dir_path,silent=True):  #basic reconstruction of a parallel case
+    print("Reconstructing the case")
+    reconstruct_runner = BasicRunner(argv=["reconstructPar", "-case", dir_path], silent=False)
+    reconstruct_runner.start()
+    if reconstruct_runner.runOK():
+        print("reconstructPar ran successfully")
+    else:
+        print("reconstructPar failed for case")    

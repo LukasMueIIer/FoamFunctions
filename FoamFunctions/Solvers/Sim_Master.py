@@ -34,7 +34,7 @@ class sim_master:
 
         #write solver information to controlDict
         cD_file["application"] = sim.solver
-        if(len(self.solverEndtimes == 0)):
+        if(len(self.solverEndtimes) == 0):
             cD_file["endTime"]  = str(sim.time)
             self.solverEndtimes.append(sim.time)
         else:
