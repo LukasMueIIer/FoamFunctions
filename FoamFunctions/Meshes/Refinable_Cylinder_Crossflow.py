@@ -8,7 +8,7 @@ def  classic_mesh(directory,diameter,y_wall,rad_count):    #create a classical b
     #classic chopping approach for the cylinder in freestream
     #geometry
     d = diameter #diameter cylinder
-    h = 10 * diameter   #hight of simulated "channel"
+    h = 20 * diameter   #hight of simulated "channel"
     l1 = 15 * diameter  #length from inlet to center cylinder
     l2 = 20 * diameter  #length form center cylinder to outlet
     dist_extrude = 0.01 #depth in z direction
@@ -23,7 +23,7 @@ def  classic_mesh(directory,diameter,y_wall,rad_count):    #create a classical b
     radial_count = rad_count #8 * 15   #amount of radial sections around cylinder
 
     inlet_cell_count = 15       #amount of cells for inlet
-    inlet_expansion_ratio = 1.05 #expansion ratio towards the inlet (larger at inlet)
+    inlet_expansion_ratio = 1 #expansion ratio towards the inlet (larger at inlet)
 
 
     #file_path = os.path.dirname(os.path.realpath(__file__)) #to write relative to script path
@@ -204,8 +204,8 @@ def  classic_mesh(directory,diameter,y_wall,rad_count):    #create a classical b
     mesh.set_default_patch("far_field","patch")
 
     #set the type of empty patches
-    mesh.patch_list.modify("empty_top","empty")
-    mesh.patch_list.modify("empty_bottom","empty")
+    mesh.patch_list.modify("empty_top","symmetryPlane")
+    mesh.patch_list.modify("empty_bottom","symmetryPlane")
     #set the type of the cylinder
     mesh.patch_list.modify("cylinder","wall")
     #debugging mode 
