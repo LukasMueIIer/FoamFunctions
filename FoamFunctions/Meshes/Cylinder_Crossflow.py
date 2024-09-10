@@ -22,7 +22,7 @@ def  classic_mesh(directory,diameter,y_wall,rad_count):    #create a classical b
     expansion_ratio_bl_cylinder = 1.03 #expansion ratio of boundary layer
     radial_count = rad_count #8 * 15   #amount of radial sections around cylinder
 
-    inlet_cell_count = 15       #amount of cells for inlet
+    inlet_cell_count = 30       #amount of cells for inlet
     inlet_expansion_ratio = 1.05 #expansion ratio towards the inlet (larger at inlet)
 
 
@@ -166,7 +166,7 @@ def  classic_mesh(directory,diameter,y_wall,rad_count):    #create a classical b
                     [-l2,h/2,0]]
     face_outlet_A = cb.Face(points_outlet_A)
     outlet_A = cb.Extrude(face_outlet_A,dist_extrude)
-    outlet_A.chop(0,count = 30)
+    outlet_A.chop(0,count = 100)
     outlet_A.chop(1,count = c_cells_x)
     outlet_A.chop(2,count=1)
     outlet_A.set_patch("left","outlet")
@@ -180,7 +180,7 @@ def  classic_mesh(directory,diameter,y_wall,rad_count):    #create a classical b
                     [-l2,sr2*r2,0]]
     face_outlet_B = cb.Face(points_outlet_B)
     outlet_B = cb.Extrude(face_outlet_B,dist_extrude)
-    outlet_B.chop(0,count = 30)             #TODO maybe ad c2c expansion for numeric dampening
+    outlet_B.chop(0,count = 10)             #TODO maybe ad c2c expansion for numeric dampening
     outlet_B.chop(1,count = radial_count/8)
     outlet_B.chop(2,count=1)
     outlet_B.set_patch("left","outlet")
