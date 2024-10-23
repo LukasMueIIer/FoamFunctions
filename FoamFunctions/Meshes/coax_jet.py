@@ -16,7 +16,6 @@ def  wedge_mesh(directory,ri,ra,l,alpha,gamma,delta):    #create a classical bas
     
     wedge_inner.chop(0,count = 3)
     wedge_inner.chop(1,count = 10)
-    wedge_inner.chop(2,count = 1)
 
     shapes.append(wedge_inner)
 
