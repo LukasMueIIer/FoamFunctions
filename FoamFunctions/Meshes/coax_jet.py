@@ -10,15 +10,15 @@ def  wedge_mesh(directory,ri,ra,l,alpha,gamma,delta):    #create a classical bas
     #buildup
     shapes = []
 
-    points_inner = [[0,0,0],[l,0,0],[l,ri - delta + l * np.tan(alpha - gamma),0],[0,ri - delta,0]]
+    points_inner = [[0,0,0],[l,0,0],[l,ri - delta + l * np.tan(np.deg2rad(alpha - gamma)),0],[0,ri - delta,0]]
     face_inner = cb.Face(points_inner)
     wedge_inner = cb.Wedge(face_inner)
     
-    wedge_inner.chop(0,count = 10)
-    wedge_inner.chop(1,cont = 10)
+    wedge_inner.chop(0,count = 3)
+    wedge_inner.chop(1,count = 10)
     wedge_inner.chop(2,count = 1)
 
-    shape.append(wedge_inner)
+    shapes.append(wedge_inner)
 
     # add everything to mesh
     mesh = cb.Mesh()
