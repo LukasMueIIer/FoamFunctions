@@ -2,7 +2,7 @@ import classy_blocks as cb
 import numpy as np
 import os
 
-def  wedge_mesh(directory,ri,ra,l,alpha,gamma,delta,x_count):    #create a classical based mesh 
+def  wedge_mesh(directory,ri,ra,l,alpha,gamma,delta,x_count,buffer_count):    #create a classical based mesh 
     
 
     file_path = directory
@@ -31,8 +31,19 @@ def  wedge_mesh(directory,ri,ra,l,alpha,gamma,delta,x_count):    #create a class
     wedge_buffer_inner.set_patch("left","inlet_inner")
     wedge_buffer_inner.set_patch("right","outlet")
     wedge_buffer_inner.chop(0,count = x_count)
-    wedge_buffer_inner.chop(1,count = 10)
+    wedge_buffer_inner.chop(1,count = buffer_count)
     shapes.append(wedge_buffer_inner)
+
+    points_buffer_outer = [[0,ri,0],[l,ri + l * np.tan(np.deg2rad(alpha)),0],[l,ri + delta + l * np.tan(np.deg2rad(alpha + gamma)),0],[0,ri+delta,0]]
+    face_buffer_outer = cb.Face(points_buffer_outer)
+    wedge_buffer_outer = cb.Wedge(face_buffer_outer)
+
+    wedge_buffer_outer.set_patch("left","inlet_outer")
+    wedge_buffer_outer.set_patch("right","outlet")
+    wedge_buffer_outer.chop(0,count = x_count)
+    wedge_buffer_outer.chop(1,count = buffer_count)
+    shapes.append(wedge_buffer_outer)
+
 
     # add everything to mesh
     mesh = cb.Mesh()
