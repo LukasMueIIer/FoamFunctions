@@ -10,6 +10,7 @@ def  wedge_mesh(directory,ri,ra,l,alpha,gamma,delta,x_count):    #create a class
     #buildup
     shapes = []
 
+
     points_inner = [[0,0,0],[l,0,0],[l,ri - delta + l * np.tan(np.deg2rad(alpha - gamma)),0],[0,ri - delta,0]]
     face_inner = cb.Face(points_inner)
     wedge_inner = cb.Wedge(face_inner)
@@ -21,6 +22,17 @@ def  wedge_mesh(directory,ri,ra,l,alpha,gamma,delta,x_count):    #create a class
     wedge_inner.chop(1,count = 10)
 
     shapes.append(wedge_inner)
+
+
+    points_buffer_inner = [[0,ri - delta,0],[l,ri - delta + l * np.tan(np.deg2rad(alpha - gamma)),0],[l,ri + l * np.tan(np.deg2rad(alpha)),0],[0,ri,0]]
+    face_buffer_inner = cb.Face(points_buffer_inner)
+    wedge_buffer_inner = cb.Wedge(face_buffer_inner)
+
+    wedge_buffer_inner.set_patch("left","inlet_inner")
+    wedge_buffer_inner.set_patch("right","outlet")
+    wedge_buffer_inner.chop(0,count = x_count)
+    wedge_buffer_inner.chop(1,count = 10)
+    shapes.append(wedge_buffer_inner)
 
     # add everything to mesh
     mesh = cb.Mesh()
