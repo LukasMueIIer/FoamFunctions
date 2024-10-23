@@ -2,7 +2,7 @@ import classy_blocks as cb
 import numpy as np
 import os
 
-def  classic_mesh(directory,ri,ra,l,alpha,gamma,delta):    #create a classical based mesh 
+def  wedge_mesh(directory,ri,ra,l,alpha,gamma,delta):    #create a classical based mesh 
     
 
     file_path = directory

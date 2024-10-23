@@ -21,6 +21,9 @@ Contains meshing approaches to mesh a cylinder in a crossflow
 ### Refinable Cylinder in Crossflow
 Contains meshing approaches to mesh a cylinder in a crossflow, but uses symmetry instead of empty for front an back to allow for the non 2D refining
 
+### coax jet
+Structured Mesh for a coaxial Jet, wedge is for a cylindical case and flat for a 2d case
+
 ## Tools
 ### Data Readers
 Functions to extract data from files that are created by OpenFoam. This data can then be used for further processing in python
