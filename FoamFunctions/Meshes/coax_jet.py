@@ -2,7 +2,7 @@ import classy_blocks as cb
 import numpy as np
 import os
 
-def  wedge_mesh(directory,ri,ra,l,alpha,gamma,delta):    #create a classical based mesh 
+def  wedge_mesh(directory,ri,ra,l,alpha,gamma,delta,x_count):    #create a classical based mesh 
     
 
     file_path = directory
@@ -14,7 +14,10 @@ def  wedge_mesh(directory,ri,ra,l,alpha,gamma,delta):    #create a classical bas
     face_inner = cb.Face(points_inner)
     wedge_inner = cb.Wedge(face_inner)
     
-    wedge_inner.chop(0,count = 3)
+    wedge_inner.set_patch("left","inlet_inner")
+    wedge_inner.set_patch("right","outlet")
+
+    wedge_inner.chop(0,count = x_count)
     wedge_inner.chop(1,count = 10)
 
     shapes.append(wedge_inner)
@@ -24,7 +27,7 @@ def  wedge_mesh(directory,ri,ra,l,alpha,gamma,delta):    #create a classical bas
     for shape in shapes:
         mesh.add(shape)
 
-    mesh.set_default_patch("far_field","patch")
+    #mesh.set_default_patch("far_field","patch")
 
     #debugging mode 
     #mesh.write(file_path + "/system/blockMeshDict", "debug.vtk")
