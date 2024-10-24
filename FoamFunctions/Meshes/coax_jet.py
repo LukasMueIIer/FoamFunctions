@@ -15,7 +15,7 @@ def  wedge_mesh(directory,ri,ra,l,alpha,gamma,delta,x_count,buffer_count,exp_inn
     size_buffer = size_buffer * (ri - delta + l * np.tan(np.deg2rad(alpha - gamma))) / (ri - delta)
     points_inner = [[0,0,0],[l,0,0],[l,ri - delta + l * np.tan(np.deg2rad(alpha - gamma)),0],[0,ri - delta,0]]
     face_inner = cb.Face(points_inner)
-    wedge_inner = cb.Wedge(face_inner)
+    wedge_inner = cb.Wedge(face_inner,angle=5)
     
     wedge_inner.set_patch("left","inlet_inner")
     wedge_inner.set_patch("right","outlet")
@@ -28,7 +28,7 @@ def  wedge_mesh(directory,ri,ra,l,alpha,gamma,delta,x_count,buffer_count,exp_inn
 
     points_buffer_inner = [[0,ri - delta,0],[l,ri - delta + l * np.tan(np.deg2rad(alpha - gamma)),0],[l,ri + l * np.tan(np.deg2rad(alpha)),0],[0,ri,0]]
     face_buffer_inner = cb.Face(points_buffer_inner)
-    wedge_buffer_inner = cb.Wedge(face_buffer_inner)
+    wedge_buffer_inner = cb.Wedge(face_buffer_inner,angle=5)
 
     wedge_buffer_inner.set_patch("left","inlet_inner")
     wedge_buffer_inner.set_patch("right","outlet")
@@ -38,7 +38,7 @@ def  wedge_mesh(directory,ri,ra,l,alpha,gamma,delta,x_count,buffer_count,exp_inn
 
     points_buffer_outer = [[0,ri,0],[l,ri + l * np.tan(np.deg2rad(alpha)),0],[l,ri + delta + l * np.tan(np.deg2rad(alpha + gamma)),0],[0,ri+delta,0]]
     face_buffer_outer = cb.Face(points_buffer_outer)
-    wedge_buffer_outer = cb.Wedge(face_buffer_outer)
+    wedge_buffer_outer = cb.Wedge(face_buffer_outer,angle=5)
 
     wedge_buffer_outer.set_patch("left","inlet_outer")
     wedge_buffer_outer.set_patch("right","outlet")
@@ -48,7 +48,7 @@ def  wedge_mesh(directory,ri,ra,l,alpha,gamma,delta,x_count,buffer_count,exp_inn
 
     points_outer = [[0,ri+delta,0],[l,ri + delta + l * np.tan(np.deg2rad(alpha + gamma)),0],[l,ra,0],[0,ra,0]]
     face_outer = cb.Face(points_outer)
-    wedge_outer = cb.Wedge(face_outer)
+    wedge_outer = cb.Wedge(face_outer,angle=5)
 
     wedge_outer.set_patch("left","inlet_outer")
     wedge_outer.set_patch("right","outlet")
