@@ -63,6 +63,10 @@ def  wedge_mesh(directory,ri,ra,l,alpha,gamma,delta,x_count,buffer_count,exp_inn
 
     mesh.set_default_patch("upper","patch")
 
+    #set the type of empty patches
+    mesh.patch_list.modify("wedge_back","wedge")
+    mesh.patch_list.modify("wedge_front","wedge")
+
     #debugging mode 
     #mesh.write(file_path + "/system/blockMeshDict", "debug.vtk")
     mesh.write(file_path + "/system/blockMeshDict")
