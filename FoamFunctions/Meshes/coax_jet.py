@@ -131,6 +131,7 @@ def  wedge_mesh_piped(directory,ri,ra,l,l_pipe,alpha,gamma,delta,x_count,buffer_
     wedge_pipe_buffer = cb.Wedge(face_pipe_buffer)
 
     wedge_pipe_buffer.set_patch("left","inlet_outer")
+    wedge_pipe_buffer.set_patch("front","pipe")
     wedge_pipe_buffer.chop(0,end_size = l/x_count, c2c_expansion = 1 / exp_pipe)
     wedge_pipe_buffer.chop(1,count = buffer_count)
     shapes.append(wedge_pipe_buffer)
@@ -154,6 +155,7 @@ def  wedge_mesh_piped(directory,ri,ra,l,l_pipe,alpha,gamma,delta,x_count,buffer_
     #set the type of empty patches
     mesh.patch_list.modify("wedge_back","wedge")
     mesh.patch_list.modify("wedge_front","wedge")
+    mesh.patch_list.modify("pipe","wall")
 
     #debugging mode 
     #mesh.write(file_path + "/system/blockMeshDict", "debug.vtk")
