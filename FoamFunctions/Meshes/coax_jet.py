@@ -122,7 +122,7 @@ def  wedge_mesh_piped(directory,ri,ra,l,l_pipe,alpha,gamma,delta,x_count,buffer_
 
     wedge_outer.set_patch("right","outlet")
     wedge_outer.chop(0,count = x_count)
-    wedge_outer.chop(1,start_size = size_buffer, c2c_expansion = exp_outer,take = "max")
+    wedge_outer.chop(1,start_size = size_buffer, c2c_expansion = exp_outer,take = "max",preserve="start_size")
     shapes.append(wedge_outer)
 
 
@@ -141,7 +141,7 @@ def  wedge_mesh_piped(directory,ri,ra,l,l_pipe,alpha,gamma,delta,x_count,buffer_
 
     wedge_pipe_outer.set_patch("left","inlet_outer")
     wedge_pipe_outer.chop(0,end_size = l/x_count, c2c_expansion = 1 / exp_pipe)
-    wedge_pipe_outer.chop(1,start_size = size_buffer, c2c_expansion = exp_outer,take="min")#,preserve="start_size")
+    wedge_pipe_outer.chop(1,start_size = size_buffer, c2c_expansion = exp_outer,take="min",preserve="start_size")
     shapes.append(wedge_pipe_outer)
 
     # add everything to mesh
