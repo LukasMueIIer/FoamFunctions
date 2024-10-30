@@ -125,3 +125,14 @@ def copy_and_renumber(dir_path,source : str,target : str): #coppies the timestep
     shutil.copytree(src_folder, dest_folder)
 
     print(f'Folder {source} has been copied and renamed to {target} in {dir_path}.')
+
+def run_setExprFields(dir_path,silent=True,exclude_0 = True): #basic setExprFields execution with no addons
+    #exclude_0 means that the 0 timestep will not be overwritten
+    EF_runner = BasicRunner(argv=["setExprFields","-case",dir_path],silent=silent)
+    if(exclude_0):
+        EF_runner = BasicRunner(argv=["setExprFields","-case",dir_path,"-noZero"],silent=silent)
+    EF_runner.start()
+    if EF_runner.runOK():
+        print(f"setExprFields ran successfully")
+    else:
+        print(f"setExprFields failed for case")
