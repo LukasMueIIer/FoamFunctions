@@ -115,3 +115,13 @@ def find_largest_numbered_directory(dir_path):
         print("No folders with integer names found.")
 
     return largest_folder_path
+
+def copy_and_renumber(dir_path,source : str,target : str): #coppies the timestep with name source and renames to to target
+    # Define source and destination paths
+    src_folder = os.path.join(dir_path, source)
+    dest_folder = os.path.join(dir_path, target)
+
+    # Copy the folder and rename it
+    shutil.copytree(src_folder, dest_folder)
+
+    print(f'Folder {source} has been copied and renamed to {target} in {dir_path}.')
