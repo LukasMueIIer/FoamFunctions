@@ -136,3 +136,14 @@ def run_setExprFields(dir_path,silent=True,exclude_0 = True): #basic setExprFiel
         print(f"setExprFields ran successfully")
     else:
         print(f"setExprFields failed for case")
+
+def remove_PyFoam_Logs(dir_path): #removes all files that start with "PyFoam" in the top level off dir path
+    # List all files in the top-level of dir_path
+    for filename in os.listdir(dir_path):
+        # Construct the full file path
+        file_path = os.path.join(dir_path, filename)
+        
+        # Check if it's a file (not a directory) and starts with "PyFoam"
+        if os.path.isfile(file_path) and filename.startswith("PyFoam"):
+            os.remove(file_path)  # Delete the file
+            print(f'Deleted: {file_path}')
