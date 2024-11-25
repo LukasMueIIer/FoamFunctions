@@ -24,6 +24,9 @@ Contains meshing approaches to mesh a cylinder in a crossflow, but uses symmetry
 ### coax jet
 Structured Mesh for a coaxial Jet, wedge is for a cylindical case and flat for a 2d case
 
+### Line
+a straight line to do 1D simulation, mesh has 2 empty directions
+
 ## Tools
 ### Data Readers
 Functions to extract data from files that are created by OpenFoam. This data can then be used for further processing in python
