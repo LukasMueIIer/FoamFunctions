@@ -147,3 +147,34 @@ def remove_PyFoam_Logs(dir_path): #removes all files that start with "PyFoam" in
         if os.path.isfile(file_path) and filename.startswith("PyFoam"):
             os.remove(file_path)  # Delete the file
             print(f'Deleted: {file_path}')
+
+
+def fix_setField_variable_syntax(file_path):
+    """
+    Corrects the setExprFields dict after it is written with pyFoam. Removes the wrong ' in the variable line
+    Reads a file, removes single quotes around the variables line, and writes the corrected content back.
+    
+    Args:
+        file_path (str): Path to the file to be fixed.
+    """
+    try:
+        with open(file_path, 'r') as file:
+            lines = file.readlines()
+        
+        # Modify the specific line containing 'variables'
+        for i, line in enumerate(lines):
+            if line.strip().startswith("variables '(") and line.strip().endswith(")';"):
+                # Replace single quotes in this specific line
+                lines[i] = line.replace("variables '(", "variables (").replace(")';", ");")
+                break
+        
+        # Write back the updated lines to the file
+        with open(file_path, 'w') as file:
+            file.writelines(lines)
+        
+        print("File updated successfully.")
+    
+    except FileNotFoundError:
+        print(f"Error: File not found at {file_path}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
