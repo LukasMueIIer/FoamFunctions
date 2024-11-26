@@ -22,7 +22,7 @@ def clean_parallel_and_postProcessing(dir_path):
     #cleans up a case that was run in parallel and also removes the postProcessing dictionary
 
     dire = SolutionDirectory(dir_path,parallel=True)
-    dire.clearResults(removeProcs=True)
+    dire.clearResults(removeProcs=True,after=0)
     dire = SolutionDirectory(dir_path) #this weird thing is needed to remove the proccessor directories
     #delete PostProcessingResults
     post_processing_dir = os.path.join(dir_path, "postProcessing")
