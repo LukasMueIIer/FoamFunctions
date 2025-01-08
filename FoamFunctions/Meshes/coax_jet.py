@@ -160,3 +160,60 @@ def  wedge_mesh_piped(directory,ri,ra,l,l_pipe,alpha,gamma,delta,x_count,buffer_
     #debugging mode 
     #mesh.write(file_path + "/system/blockMeshDict", "debug.vtk")
     mesh.write(file_path + "/system/blockMeshDict")
+
+
+def optimized_wedge_piped(directory,ri,ra,l,l_pipe,alpha,x_count,core_y_refine):
+    #ri is the pipe diameter
+    #ra is the diameted of the domain
+    #l is length of the domain
+    #l_pipe is length of the pipe
+    #alpha is expected spread angle
+    #x_count is the chopping count of the jet domain in x-direction
+    #core y_refinement dictates the core chopping count multiplyer total count is 15 * core_y_refine, only integers allowed
+
+    file_path = directory
+    #buildup
+    shapes = []
+    ang = np.deg2rad(2)
+
+    #Create the mesh for the Jet Part
+    #calculate predicted endpoints
+    ri_1 = ri  + l * np.tan(np.deg2rad(alpha))
+
+    def create_core_block(ri_0,x1,ri_1,y_rel_in,y_rel_a,refine_factor):
+        #creates the subblocks to get the optimized chopping
+        y_inner_0 =  y_rel_in * ri_0
+        y_inner_1 =  y_rel_in * ri_1
+        y_outer_0 =  y_rel_a * ri_0
+        y_outer_1 =  y_rel_a * ri_1
+
+        points = [[0,y_inner_0,0],[l,y_inner_1,0],[l,y_outer_1,0],[0,y_outer_0,0]]
+        face = cb.Face(points)
+        wedge = cb.Wedge(face,angle=ang)
+
+        wedge.set_patch("left","inlet_inner")
+        wedge.set_patch("right","outlet")
+        wedge.chop(0,count = x_count)
+        wedge.chop(1,count = core_y_refine - 1)
+        shapes.append(wedge)
+
+    chop_points = [0, 5.26013094e-02, 1.15722881e-01, 1.91468768e-01,
+               2.82363834e-01, 3.91437913e-01, 4.82332978e-01, 5.58078865e-01,
+               6.48973930e-01, 7.24719816e-01, 7.87841388e-01, 8.40442697e-01,
+               9.03564268e-01, 9.56165577e-01, 1.00000000e+00]
+
+    for i in range(0,14):
+        create_core_block(ri,l,ri_1,chop_points[i],chop_points[i+1],core_y_refine)
+
+    # add everything to mesh
+    mesh = cb.Mesh()
+    for shape in shapes:
+        mesh.add(shape)
+    mesh.set_default_patch("upper","patch")
+    #set the type of empty patches
+    mesh.patch_list.modify("wedge_back","wedge")
+    mesh.patch_list.modify("wedge_front","wedge")
+    mesh.patch_list.modify("pipe","wall")
+    #debugging mode 
+    #mesh.write(file_path + "/system/blockMeshDict", "debug.vtk")
+    mesh.write(file_path + "/system/blockMeshDict")
