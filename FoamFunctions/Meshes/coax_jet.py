@@ -194,7 +194,7 @@ def optimized_wedge_piped(directory,ri,ra,l,l_pipe,alpha,x_count,core_y_refine):
         wedge.set_patch("left","inlet_inner")
         wedge.set_patch("right","outlet")
         wedge.chop(0,count = x_count)
-        wedge.chop(1,count = core_y_refine - 1)
+        wedge.chop(1,count = core_y_refine)
         shapes.append(wedge)
 
     chop_points = [0, 5.26013094e-02, 1.15722881e-01, 1.91468768e-01,
@@ -213,7 +213,7 @@ def optimized_wedge_piped(directory,ri,ra,l,l_pipe,alpha,x_count,core_y_refine):
     #set the type of empty patches
     mesh.patch_list.modify("wedge_back","wedge")
     mesh.patch_list.modify("wedge_front","wedge")
-    mesh.patch_list.modify("pipe","wall")
+    #mesh.patch_list.modify("pipe","wall")
     #debugging mode 
     #mesh.write(file_path + "/system/blockMeshDict", "debug.vtk")
     mesh.write(file_path + "/system/blockMeshDict")
