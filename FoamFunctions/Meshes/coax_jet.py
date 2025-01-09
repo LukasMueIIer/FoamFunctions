@@ -162,7 +162,7 @@ def  wedge_mesh_piped(directory,ri,ra,l,l_pipe,alpha,gamma,delta,x_count,buffer_
     mesh.write(file_path + "/system/blockMeshDict")
 
 
-def optimized_wedge_piped(directory,ri,ra,l,l_pipe,alpha,x_count,core_y_refine):
+def optimized_wedge_piped(directory,ri,ra,l,l_pipe,alpha,x_count,core_y_refine,exp_ratio_y,exp_ratio_x_pipe):
     #ri is the pipe diameter
     #ra is the diameted of the domain
     #l is length of the domain
@@ -196,14 +196,32 @@ def optimized_wedge_piped(directory,ri,ra,l,l_pipe,alpha,x_count,core_y_refine):
         wedge.chop(0,count = x_count)
         wedge.chop(1,count = core_y_refine)
         shapes.append(wedge)
+        return [(y_outer_0 - y_inner_0),(y_outer_1 - y_inner_1)]
 
     chop_points = [0, 5.26013094e-02, 1.15722881e-01, 1.91468768e-01,
                2.82363834e-01, 3.91437913e-01, 4.82332978e-01, 5.58078865e-01,
                6.48973930e-01, 7.24719816e-01, 7.87841388e-01, 8.40442697e-01,
                9.03564268e-01, 9.56165577e-01, 1.00000000e+00]
 
+    last_cell_size = 0
+    last_cell_size_rear = 0
     for i in range(0,14):
-        create_core_block(ri,l,ri_1,chop_points[i],chop_points[i+1],core_y_refine)
+        last_cell_size,last_cell_size_rear = (create_core_block(ri,l,ri_1,chop_points[i],chop_points[i+1],core_y_refine))
+        last_cell_size = last_cell_size / core_y_refine
+        last_cell_size_rear = last_cell_size_rear / core_y_refine
+
+    #Outer Block 
+    #calculate the required length on the outlet to get nice cells
+    factor_sum_er = (ra - ri) /last_cell_size
+    l2 = factor_sum_er * last_cell_size_rear
+    points = [[0,ri,0],[l,ri_1,0],[l,ri_1 + l2,0],[0,ra,0]]
+    face = cb.Face(points)
+    wedge = cb.Wedge(face,angle=ang)
+    wedge.set_patch("right","outlet")
+    wedge.chop(0,count = x_count)
+    wedge.chop(1,start_size=last_cell_size,c2c_expansion=exp_ratio_y,take="min",preserve="c2c_expansion")
+    shapes.append(wedge)
+
 
     # add everything to mesh
     mesh = cb.Mesh()
