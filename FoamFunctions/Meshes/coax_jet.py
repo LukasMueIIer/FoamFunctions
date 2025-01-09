@@ -214,13 +214,22 @@ def optimized_wedge_piped(directory,ri,ra,l,l_pipe,alpha,x_count,core_y_refine,e
     #calculate the required length on the outlet to get nice cells
     factor_sum_er = (ra - ri) /last_cell_size
     l2 = factor_sum_er * last_cell_size_rear
-    points = [[0,ri,0],[l,ri_1,0],[l,ri_1 + l2,0],[0,ra,0]]
+    points = [[0,ri,0],[l,ri_1,0],[l,ra + 3 * l * np.tan(np.deg2rad(alpha)),0],[0,ra,0]]
     face = cb.Face(points)
     wedge = cb.Wedge(face,angle=ang)
     wedge.set_patch("right","outlet")
     wedge.chop(0,count = x_count)
-    wedge.chop(1,start_size=last_cell_size,c2c_expansion=exp_ratio_y,take="min",preserve="c2c_expansion")
+    wedge.chop(1,start_size=last_cell_size,c2c_expansion=exp_ratio_y,take="min",preserve="end_size")
     shapes.append(wedge)
+
+    points_pipe_buffer = [[-1 * l_pipe,ri,0],[0,ri,0],[0,ra,0],[-1 * l_pipe,ra,0]]
+    face_pipe_buffer = cb.Face(points_pipe_buffer)
+    wedge_pipe_buffer = cb.Wedge(face_pipe_buffer)
+    wedge_pipe_buffer.set_patch("left","inlet_outer")
+    wedge_pipe_buffer.set_patch("front","pipe")
+    wedge_pipe_buffer.chop(0,end_size = l/x_count, c2c_expansion = 1 / exp_ratio_x_pipe)
+    wedge_pipe_buffer.chop(1,start_size=last_cell_size,c2c_expansion=exp_ratio_y)
+    shapes.append(wedge_pipe_buffer)
 
 
     # add everything to mesh
@@ -231,7 +240,7 @@ def optimized_wedge_piped(directory,ri,ra,l,l_pipe,alpha,x_count,core_y_refine,e
     #set the type of empty patches
     mesh.patch_list.modify("wedge_back","wedge")
     mesh.patch_list.modify("wedge_front","wedge")
-    #mesh.patch_list.modify("pipe","wall")
+    mesh.patch_list.modify("pipe","wall")
     #debugging mode 
     #mesh.write(file_path + "/system/blockMeshDict", "debug.vtk")
     mesh.write(file_path + "/system/blockMeshDict")
