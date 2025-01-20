@@ -122,6 +122,11 @@ def copy_and_renumber(dir_path,source : str,target : str): #coppies the timestep
     dest_folder = os.path.join(dir_path, target)
 
     # Copy the folder and rename it
+    if os.path.exists(dest_folder):
+        # If it exists, delete it
+        shutil.rmtree(dest_folder)
+    # Copy the source folder to the destination
+
     shutil.copytree(src_folder, dest_folder)
 
     print(f'Folder {source} has been copied and renamed to {target} in {dir_path}.')
