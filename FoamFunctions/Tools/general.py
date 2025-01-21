@@ -183,3 +183,68 @@ def fix_setField_variable_syntax(file_path):
         print(f"Error: File not found at {file_path}")
     except Exception as e:
         print(f"An error occurred: {e}")
+
+def delete_time_folders(directory_path):
+    """
+    Deletes all folders in the specified directory whose names are valid float numbers and do not contain any letters.
+
+    Args:
+        directory_path (str): Path to the directory.
+
+    Returns:
+        None
+    """
+    # Ensure the provided path is a directory
+    if not os.path.isdir(directory_path):
+        print(f"Error: The path {directory_path} is not a valid directory.")
+        return
+
+    # Iterate through the items in the directory
+    for item in os.listdir(directory_path):
+        item_path = os.path.join(directory_path, item)
+
+        # Check if the item is a directory
+        if os.path.isdir(item_path):
+            # Check if the folder name is a float and contains no letters
+            try:
+                if item.replace('.', '', 1).isdigit() and not any(char.isalpha() for char in item):
+                    # Delete the folder
+                    shutil.rmtree(item_path)
+                    print(f"Deleted folder: {item}")
+            except ValueError:
+                pass
+
+def copy_field_files(target_directory, source_directory, file_list, overwrite=False):
+    """
+    Copies specified files from the source directory to the target directory.
+
+    Args:
+        target_directory (str): Path to the target directory.
+        source_directory (str): Path to the source directory.
+        file_list (list): List of file names to copy.
+        overwrite (bool): If True, overwrite files in the target directory if they already exist.
+
+    Returns:
+        None
+    """
+    # Ensure the target directory exists
+    if not os.path.exists(target_directory):
+        os.makedirs(target_directory)
+        print(f"Created target directory: {target_directory}")
+
+    # Iterate over the file list and copy files
+    for file_name in file_list:
+        source_path = os.path.join(source_directory, file_name)
+        target_path = os.path.join(target_directory, file_name)
+
+        # Check if the file exists in the source directory
+        if not os.path.exists(source_path):
+            print(f"File not found in source directory: {source_path}")
+            continue
+
+        # Copy the file, handling overwriting if necessary
+        if not os.path.exists(target_path) or overwrite:
+            shutil.copy2(source_path, target_path)
+            print(f"Copied file: {file_name} to {target_directory}")
+        else:
+            print(f"File already exists and overwrite is set to False: {file_name}")

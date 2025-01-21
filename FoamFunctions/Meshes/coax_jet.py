@@ -361,3 +361,39 @@ def piped_double_stacked_wedge_mesh(directory,ri,ra,l,l_pipe,spread_angle,x_coun
     #debugging mode 
     #mesh.write(file_path + "/system/blockMeshDict", "debug.vtk")
     mesh.write(file_path + "/system/blockMeshDict")
+
+def full_rotational_mesh(directory,ri,ra,l,l_pipe,spread_angle,x_count,y_count,exp_Inlet,exp_Farfield):
+    file_path = directory
+    #buildup
+    shapes = []
+   
+    x_size = l / (x_count)
+    y_size = ri / y_count
+
+    #Inner Cylinder
+    inlet_inner = [0,0,0]
+    outlet_inner = [l,0,0]
+    radius_inner = [0,ri,0]
+
+    inner_cylinder = cb.Cylinder(inlet_inner,outlet_inner,radius_inner)
+
+    inner_cylinder.chop_axial(start_size = x_size)
+    inner_cylinder.chop_radial(start_size = y_size)
+    inner_cylinder.chop_tangential(start_size = y_size)
+    
+    inner_cylinder.set_start_patch("inlet")
+
+    shapes.append(inner_cylinder)
+
+
+    # add everything to mesh
+    mesh = cb.Mesh()
+    for shape in shapes:
+        mesh.add(shape)
+    mesh.set_default_patch("FarField","patch")
+    #set the type of empty patches
+
+    mesh.patch_list.modify("pipe","wall")
+    #debugging mode 
+    #mesh.write(file_path + "/system/blockMeshDict", "debug.vtk")
+    mesh.write(file_path + "/system/blockMeshDict")
