@@ -246,7 +246,7 @@ def optimized_wedge_piped(directory,ri,ra,l,l_pipe,alpha,x_count,core_y_refine,e
     mesh.write(file_path + "/system/blockMeshDict")
 
 
-def piped_double_stacked_wedge_mesh(directory,ri,ra,l,l_pipe,spread_angle,x_count,y_count,exp_Inlet,exp_Farfield):    #create a classical based mesh 
+def piped_double_stacked_wedge_mesh(directory,ri,ra,l,l_pipe,spread_angle,x_count,y_count,exp_Inlet,exp_Farfield,x_decay):    #create a classical based mesh 
     
     file_path = directory
 
@@ -264,7 +264,7 @@ def piped_double_stacked_wedge_mesh(directory,ri,ra,l,l_pipe,spread_angle,x_coun
     wedge_inner.set_patch("left","inlet_inner")
     wedge_inner.set_patch("right","outlet")
 
-    wedge_inner.chop(0,count=x_count)
+    wedge_inner.chop(0,start_size=x_size,c2c_expansion= x_decay)
     wedge_inner.chop(1,count=y_count)
 
     shapes.append(wedge_inner)
@@ -289,7 +289,7 @@ def piped_double_stacked_wedge_mesh(directory,ri,ra,l,l_pipe,spread_angle,x_coun
     wedge_buffer_inner = cb.Wedge(face_buffer_inner,angle=ang)
 
     wedge_buffer_inner.set_patch("right","outlet")
-    wedge_buffer_inner.chop(0,count = x_count)
+    wedge_buffer_inner.chop(0, start_size=x_size, c2c_expansion=x_decay)
     wedge_buffer_inner.chop(1,count = y_ext_count)
     shapes.append(wedge_buffer_inner)
 
@@ -311,7 +311,7 @@ def piped_double_stacked_wedge_mesh(directory,ri,ra,l,l_pipe,spread_angle,x_coun
     wedge_buffer_outer = cb.Wedge(face_buffer_outer,angle=ang)
 
     wedge_buffer_outer.set_patch("right","outlet")
-    wedge_buffer_outer.chop(0,count=x_count)
+    wedge_buffer_outer.chop(0,start_size=x_size, c2c_expansion=x_decay)
     wedge_buffer_outer.chop(1,start_size=y_size,c2c_expansion=exp_Farfield)
     shapes.append(wedge_buffer_outer)
 
