@@ -45,7 +45,15 @@ def run_topoSet(dir_path,silent=True):
         print(f"topoSet ran successfully")
     else:
         print(f"topoSet failed for case")
-        
+
+def run_subsetMesh(dir_path,setName,silent=True):
+    sM_runner = BasicRunner(argv=["subsetMesh","-case",dir_path,str(setName)],silent=silent)
+    sM_runner.start()
+    if sM_runner.runOK():
+        print(f"subsetMesh ran successfully")
+    else:
+        print(f"subsetMesh failed for case")
+
 def renumber_Mesh(dir_path,silent=True):    #basic renumber mesh 
     rm_runner = BasicRunner(argv=["renumberMesh","-case",dir_path,"-overwrite"],silent=False)
     rm_runner.start()
