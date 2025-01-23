@@ -1,0 +1,20 @@
+#Template for a gitignore that can be used within the simulation folders based on the python workflos 
+#!!!RENAME THIS FILE
+# Ignore everything by default
+*
+
+# Except the following directories
+!/0/*
+!0
+
+!/constant/*
+!constant
+/constant/polyMesh
+
+!/system/*
+!system
+
+!PreProcessing.py
+!Simulation.py
+!PostProcessing.py
+!RunAll.py
