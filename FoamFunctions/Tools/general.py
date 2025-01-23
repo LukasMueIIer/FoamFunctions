@@ -38,6 +38,14 @@ def run_Blockmesh(dir_path,silent=True): #basic BlockMesh execution with no addo
     else:
         print(f"blockMesh failed for case")
 
+def run_topoSet(dir_path,silent=True):
+    ts_runner = BasicRunner(argv=["topoSet","-case",dir_path],silent=silent)
+    ts_runner.start()
+    if ts_runner.runOK():
+        print(f"topoSet ran successfully")
+    else:
+        print(f"topoSet failed for case")
+        
 def renumber_Mesh(dir_path,silent=True):    #basic renumber mesh 
     rm_runner = BasicRunner(argv=["renumberMesh","-case",dir_path,"-overwrite"],silent=False)
     rm_runner.start()

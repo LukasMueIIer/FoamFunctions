@@ -362,13 +362,22 @@ def piped_double_stacked_wedge_mesh(directory,ri,ra,l,l_pipe,spread_angle,x_coun
     #mesh.write(file_path + "/system/blockMeshDict", "debug.vtk")
     mesh.write(file_path + "/system/blockMeshDict")
 
-def full_rotational_mesh(directory,ri,ra,l,l_pipe,spread_angle,x_count,y_count,exp_Inlet,exp_Farfield):
+def full_rotational_mesh(directory,ri,ra,l,l_pipe,spread_angle,x_count,y_count,exp_Inlet,exp_Farfield,x_decay):
     file_path = directory
     #buildup
     shapes = []
    
     x_size = l / (x_count)
     y_size = ri / y_count
+
+    x_target = 0.25 * l_pipe
+    y_target = l * np.tan(np.deg2rad(spread_angle))
+    x_size = l / (x_count)
+    y_size = ri / y_count
+    x_ext_count = np.rint(x_target / x_size)
+    y_ext_count = np.rint(y_target / y_size)
+    x_ext = -1 * x_ext_count * x_size
+    y_ext = y_ext_count * y_size
 
     #Inner Cylinder
     inlet_inner = [0,0,0]
@@ -377,14 +386,47 @@ def full_rotational_mesh(directory,ri,ra,l,l_pipe,spread_angle,x_count,y_count,e
 
     inner_cylinder = cb.Cylinder(inlet_inner,outlet_inner,radius_inner)
 
-    inner_cylinder.chop_axial(start_size = x_size)
+    inner_cylinder.chop_axial(start_size = x_size,c2c_expansion = x_decay)
     inner_cylinder.chop_radial(start_size = y_size)
     inner_cylinder.chop_tangential(start_size = y_size)
     
     inner_cylinder.set_start_patch("inlet")
 
+    cb.SemiCylinder
+
     shapes.append(inner_cylinder)
 
+    #High Def surrounding inner and pipe
+
+    hd_outflow = cb.ExtrudedRing.expand(inner_cylinder,y_ext)
+    hd_outflow.chop_radial(start_size = y_size)
+    shapes.append(hd_outflow)
+
+    hd_pipe = cb.ExtrudedRing.chain(hd_outflow,-1 * x_ext,start_face=True)
+    hd_pipe.chop_axial(start_size = x_size)
+    shapes.append(hd_pipe)
+
+    #Surrounding ring
+    
+    outflow_ring = cb.ExtrudedRing.expand(hd_outflow,ra - ri - y_ext)
+
+    #outflow_ring.chop_axial(start_size = x_size,c2c_expansion = x_decay)
+    outflow_ring.chop_radial(start_size = y_size, c2c_expansion = exp_Farfield)
+    #outflow_ring.chop_tangential(start_size = y_size)
+
+    shapes.append(outflow_ring)
+
+    pip_hd_mantel = cb.ExtrudedRing.chain(outflow_ring, -1 * x_ext, start_face=True)
+    pip_hd_mantel.chop_axial(start_size = x_size)
+    shapes.append(pip_hd_mantel)
+
+    pipe_buffer = cb.ExtrudedRing.chain(hd_pipe,l_pipe + x_ext)
+    pipe_buffer.chop_axial(start_size = x_size, c2c_expansion = exp_Inlet)
+    shapes.append(pipe_buffer)
+
+    Inflow_Buffer = cb.ExtrudedRing.chain(pip_hd_mantel,l_pipe + x_ext)
+    Inflow_Buffer.chop_axial(start_size = x_size, c2c_expansion = exp_Inlet)
+    shapes.append(Inflow_Buffer)
 
     # add everything to mesh
     mesh = cb.Mesh()
@@ -395,5 +437,5 @@ def full_rotational_mesh(directory,ri,ra,l,l_pipe,spread_angle,x_count,y_count,e
 
     mesh.patch_list.modify("pipe","wall")
     #debugging mode 
-    #mesh.write(file_path + "/system/blockMeshDict", "debug.vtk")
-    mesh.write(file_path + "/system/blockMeshDict")
+    mesh.write(file_path + "/system/blockMeshDict", "debug.vtk")
+    #mesh.write(file_path + "/system/blockMeshDict")
