@@ -46,8 +46,11 @@ def run_topoSet(dir_path,silent=True):
     else:
         print(f"topoSet failed for case")
 
-def run_subsetMesh(dir_path,setName,silent=True):
-    sM_runner = BasicRunner(argv=["subsetMesh","-case",dir_path,str(setName)],silent=silent)
+def run_subsetMesh(dir_path,setName,overwrite = True,silent=True):
+    if(overwrite):
+        sM_runner = BasicRunner(argv=["subsetMesh","-case","-overwrite",dir_path,str(setName)],silent=silent)
+    else:
+        sM_runner = BasicRunner(argv=["subsetMesh","-case",dir_path,str(setName)],silent=silent)
     sM_runner.start()
     if sM_runner.runOK():
         print(f"subsetMesh ran successfully")
