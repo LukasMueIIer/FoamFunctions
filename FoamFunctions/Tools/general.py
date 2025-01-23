@@ -65,6 +65,42 @@ def renumber_Mesh(dir_path,silent=True):    #basic renumber mesh
     else:
         print(f"renumberMesh failed for case")
 
+def change_type_in_all_files(subDirectoryPath,boundaryName,newType):
+    #this can be used to change the type of a boundary in all fields contained in a timestep
+    def get_top_level_files(directory_path):
+        """
+        Returns a list of absolute file paths for all files in the top level of the given directory.
+
+        Parameters:
+            directory_path (str): The path to the directory.
+
+        Returns:
+            list: A list of absolute file paths.
+        """
+        try:
+            # Ensure the input is a valid directory
+            if not os.path.isdir(directory_path):
+                raise ValueError(f"{directory_path} is not a valid directory.")
+
+            # List comprehension to filter only files at the top level
+            top_level_files = [
+                os.path.abspath(os.path.join(directory_path, file))
+                for file in os.listdir(directory_path)
+                if os.path.isfile(os.path.join(directory_path, file))
+            ]
+
+            return top_level_files
+
+        except Exception as e:
+            print(f"Error: {e}")
+            return []
+        
+    files = get_top_level_files(subDirectoryPath)
+    for file in files:
+        paramFile = ParsedParameterFile(file)
+        paramFile["boundaryField"][boundaryName]["type"] = newType
+        paramFile.writeFile()
+
 def paraFoam(dir_path,silent=True,vtk=True):    #basic paraFoam runner that touches and uses vtk (if activated)
     if(vtk):
         pf_runner = BasicRunner(argv=["paraFoam","-case",dir_path,"-touch","-vtk"],silent=silent)
