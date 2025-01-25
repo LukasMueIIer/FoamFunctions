@@ -418,10 +418,12 @@ def full_rotational_mesh(directory,ri,ra,l,l_pipe,spread_angle,x_count,y_count,e
 
     pip_hd_mantel = cb.ExtrudedRing.chain(outflow_ring, -1 * x_ext, start_face=True)
     pip_hd_mantel.chop_axial(start_size = x_size)
+    pip_hd_mantel.set_inner_patch("pipe")
     shapes.append(pip_hd_mantel)
 
     pipe_buffer = cb.ExtrudedRing.chain(hd_pipe,l_pipe + x_ext)
     pipe_buffer.chop_axial(start_size = x_size, c2c_expansion = exp_Inlet)
+    pipe_buffer.set_inner_patch("pipe")
     shapes.append(pipe_buffer)
 
     Inflow_Buffer = cb.ExtrudedRing.chain(pip_hd_mantel,l_pipe + x_ext)
