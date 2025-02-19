@@ -50,10 +50,14 @@ def squareNozzels(directory, radiusCore,radiusBypass,lengthCore,lengthBypass,len
     wedge.chop(0,count=xCount)
     wedge.chop(1,count=yCount)
 
+    #calculate true size for later use
+    ySizeBypass = (radiusBypass - radiusCore) / yCount
+    xSizeBypass = lengthCore / xCount
+
     shapes.append(wedge)
 
     #Connecting Block
-    points[[0,radiusCore,0],[lengthDomain,radiusCore,0],[lengthDomain,radiusBypass,0],[0,radiusBypass,0]]
+    points = [[0,radiusCore,0],[lengthDomain,radiusCore,0],[lengthDomain,radiusBypass,0],[0,radiusBypass,0]]
     face = cb.Face(points)
     wedge = cb.Wedge(face,ang)
 
@@ -61,6 +65,38 @@ def squareNozzels(directory, radiusCore,radiusBypass,lengthCore,lengthBypass,len
     wedge.chop(1,count=yCount)
 
     shapes.append(wedge)
+
+    #FAR Field
+    points = [[0,radiusBypass,0],[lengthDomain,radiusBypass,0],[lengthDomain,radiusBypass+heightDomain,0],[0,radiusBypass+heightDomain,0]]
+    face = cb.Face(points)
+    wedge = cb.Wedge(face,ang)
+
+    wedge.chop(0,start_size=xCellNozel, c2c_expansion=expansionX)
+    wedge.chop(1,start_size=ySizeBypass,c2c_expansion=expansionY)
+
+    shapes.append(wedge)
+
+    #Filler Block Between Farfield and Sponge
+    points = [[- lengthCore,radiusBypass,0],[0,radiusBypass,0],[0,radiusBypass+heightDomain,0],[- lengthCore, radiusBypass+heightDomain,0]]
+
+    face = cb.Face(points)
+    wedge = cb.Wedge(face,ang)
+    wedge.chop(0,count=xCount)
+    wedge.chop(1,start_size=ySizeBypass,c2c_expansion=expansionY)
+    shapes.append(wedge)
+
+    #Inlet Sponge
+    points = [[-lengthCore -lengthBypass,radiusBypass,0], [-lengthCore,radiusBypass,0],[-lengthCore,radiusBypass+heightDomain,0],[-lengthCore -lengthBypass,radiusBypass+heightDomain,0]]
+    face = cb.Face(points)
+    wedge = cb.Wedge(face,ang)
+
+    wedge.chop(0,end_size=xSizeBypass,c2c_expansion= 1/expansionX)
+    wedge.chop(1,start_size=ySizeBypass,c2c_expansion=expansionY)
+
+    wedge.set_patch("front","nozzle")
+
+    shapes.append(wedge)
+
 
     # add everything to mesh
     mesh = cb.Mesh()
