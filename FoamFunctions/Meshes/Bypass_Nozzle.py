@@ -416,13 +416,20 @@ class swallowingBlocksExpanding:
             self.shapes.append(copy.deepcopy(w))
 
             #old System that made severly non orthogonal Faces
-            yStartSize = yStartSize * reductionPerStep
 
             #new system .. sucks kinda
-            #factorSize = 0
+            factorSize = 0
+            for i in range(0,reductionPerStep):
+                factorSize = factorSize + yExpansionRatio ** i
 
-            #for i in range(0,reductionPerStep):
-             #   factorSize = factorSize + yExpansionRatio ** i
+            yStartSize = yStartSize * factorSize
+            yExpansionRatio = yExpansionRatio ** reductionPerStep
+
+            #new system .. sucks kinda
+            factorSize = 0
+
+            for i in range(0,reductionPerStep):
+                factorSize = factorSize + yExpansionRatio ** i
 
             #yStartSize = yStartSize * factorSize
             #yExpansionRatio = yExpansionRatio ** reductionPerStep
@@ -706,3 +713,239 @@ def cascadedBypass(file_path,radiusCore,radiusBypass,lengthCore,lengthBypass,len
 
     #mesh.write(file_path + "/system/blockMeshDict", "debug.vtk")
     mesh.write(file_path + "/system/blockMeshDict")
+
+def centerFocused(file_path,radiusCore,radiusBypass,lengthCore,lengthBypass,lengthHD,heightHD,aspectRatio,y_count_core,
+                   heightSponge,transitionLength,transitionStretching,endSpongeLength,yExpansion = 1, xExpansionInlet = 1, mantelIsWall = False):
+    
+    #Geometry
+    #radiusCore, absolute radius of the Core Nozzel
+    #radiusBypass, absolute radius of the Bypass Nozzle
+    #lengthCore, relative "extension" of the Core Nozzle after the Bypass Nozzle, must be above 0
+    #lengthBypass, length of the Wall till the Bypass Nozzle ends, must be above 0
+    #lenthDomain, how far the domain extends in x-Direction after the Core Nozzle Exit, above 0
+    #heightDomain, how far the Domain extends in y Deriction from the Radius of the Bypass Nozzle
+    #lengthSponge, length of the outlet sponge Zone in x-Direction
+    #Meshing
+    #aspectRatio, of the cells right at the Core nozzle exit
+    #y_count_core, amount of cells in y-direction for the Core
+    #xCountSponge, how many cells the XCount Sponge Zone will consist off
+    #Calculate the Cell sizes
+    xCellNozel = aspectRatio * radiusCore / y_count_core
+    yCellNozle = radiusCore / y_count_core
+
+    #buildup
+    shapes = []
+    ang = np.deg2rad(2)
+
+    #Block Core Nozzle
+    points = [[0,0,0],[lengthHD,0,0],[lengthHD,radiusCore,0],[0,radiusCore,0]]
+    face = cb.Face(points)
+    wedge = cb.Wedge(face,ang)
+
+    wedge.set_patch("left","core")
+    wedge.chop(0,start_size=xCellNozel)
+    wedge.chop(1,count = y_count_core)
+
+    shapes.append(wedge)
+
+    #Block Bypass
+    points = [[-lengthCore,radiusCore,0],[0,radiusCore,0],[0,radiusBypass,0],[-lengthCore,radiusBypass,0]]
+    face = cb.Face(points)
+    wedge = cb.Wedge(face,ang)
+
+    wedge.set_patch("left","bypass")
+    wedge.set_patch("front","nozzle")
+    #calculate the chopping that is closest to the core one
+    yCount = round((radiusBypass - radiusCore) / yCellNozle)
+    xCount = round(lengthCore / xCellNozel)
+    wedge.chop(0,count=xCount)
+    wedge.chop(1,count=yCount)
+    #calculate true size for later use
+    ySizeBypass = (radiusBypass - radiusCore) / yCount
+    xSizeBypass = lengthCore / xCount
+    shapes.append(wedge)
+
+    #Connecting Block
+    points = [[0,radiusCore,0],[lengthHD,radiusCore,0],[lengthHD,radiusBypass,0],[0,radiusBypass,0]]
+    face = cb.Face(points)
+    wedge = cb.Wedge(face,ang)
+    wedge.chop(0,start_size=xCellNozel)
+    wedge.chop(1,count=yCount)
+
+
+    yCountBypass = yCount
+    shapes.append(wedge)
+
+    
+    #The Bypass Flow
+    points = [[-lengthCore,radiusBypass,0], [0,radiusBypass,0],[0,radiusBypass+heightHD,0],[-lengthCore,radiusBypass+heightHD,0]]
+    face = cb.Face(points)
+    wedge = cb.Wedge(face,ang)
+
+    yCountBP = round((heightHD) / ySizeBypass)
+
+    wedge.chop(0,start_size=xCellNozel)
+    wedge.chop(1,count=yCountBP)
+
+    shapes.append(wedge)
+
+    points = [[0,radiusBypass,0],[lengthHD,radiusBypass,0],[lengthHD,radiusBypass + heightHD,0],[0,radiusBypass + heightHD,0]]
+    face = cb.Face(points)
+    wedge = cb.Wedge(face,ang)
+
+    wedge.chop(0,start_size=xCellNozel)
+    wedge.chop(1,count=yCountBP)
+
+    #The True Y Size we ended up with. needed for the outer sponges
+    ySizeBP = (heightHD) / yCountBP
+
+    shapes.append(wedge)
+
+    #The inlet sponge
+    points = [[-lengthCore - lengthBypass,radiusBypass,0],[ -lengthCore, radiusBypass,0],[-lengthCore, radiusBypass + heightHD,0],[-lengthCore -lengthBypass, radiusBypass + heightHD,0]]
+    face = cb.Face(points)
+    wedge = cb.Wedge(face,ang)
+
+    wedge.chop(0,end_size=xSizeBypass, c2c_expansion= 1/xExpansionInlet)
+    wedge.chop(1,count=yCountBP)
+
+    wedge.set_patch("front","nozzle")
+
+    shapes.append(wedge)
+
+
+    #The Manual Bock At the inlet with constant x Still
+    points = [[-lengthCore,radiusBypass+heightHD,0],[0,radiusBypass+heightHD,0],[0,radiusBypass+heightHD+heightSponge,0],[-lengthCore,radiusBypass+heightHD+heightSponge,0]]
+    face = cb.Face(points)
+    wedge = cb.Wedge(face,ang)
+
+    wedge.chop(0,start_size=xSizeBypass)
+    wedge.chop(1,start_size=ySizeBP, c2c_expansion=yExpansion)
+
+    wedge.set_patch("back","mantel")
+
+    shapes.append(wedge)
+
+    points = [[0,radiusBypass + heightHD,0],[lengthHD,radiusBypass + heightHD,0],[lengthHD,radiusBypass + heightHD + heightSponge,0],[0,radiusBypass + heightHD + heightSponge,0]]
+    face = cb.Face(points)
+    wedge = cb.Wedge(face,ang)
+    wedge.chop(0,start_size=xCellNozel)
+    wedge.chop(1,start_size=ySizeBP, c2c_expansion=yExpansion)
+
+    wedge.set_patch("back","mantel")
+
+    shapes.append(wedge)
+
+    #DOUBLE GRADED INLET BLOCK
+    points = [[-lengthCore - lengthBypass,radiusBypass + heightHD,0],[-lengthCore,radiusBypass + heightHD,0],[-lengthCore,radiusBypass + heightHD + heightSponge,0],[-lengthCore - lengthBypass,radiusBypass + heightHD + heightSponge,0]]
+    face = cb.Face(points)
+    wedge = cb.Wedge(face,ang)
+
+    wedge.chop(0,end_size=xSizeBypass, c2c_expansion= 1/xExpansionInlet)
+    wedge.chop(1,count=ySizeBP,c2c_expansion=yExpansion)
+
+    wedge.set_patch("back","mantel")
+
+    shapes.append(wedge)
+
+    #Creting the transition region where cells are stretched
+    points = [[lengthHD,0,0],[lengthHD + transitionLength,0,0],[lengthHD + transitionLength,radiusCore,0],[lengthHD,radiusCore,0]]
+    f = cb.Face(points)
+    w = cb.Wedge(f,ang)
+
+    w.chop(0,start_size=xCellNozel,end_size=xCellNozel * transitionStretching)
+    w.chop(1,count=y_count_core)
+
+    shapes.append(w)
+
+    points=[[lengthHD,radiusCore,0],[lengthHD+transitionLength,radiusCore,0],[lengthHD+transitionLength,radiusBypass,0],[lengthHD,radiusBypass,0]]
+    f = cb.Face(points)
+    w = cb.Wedge(f,ang)
+
+    w.chop(0,start_size=xCellNozel,end_size=xCellNozel * transitionStretching)
+    w.chop(1,start_size=ySizeBypass)
+
+    shapes.append(w)
+
+    points = [[lengthHD,radiusBypass,0],[lengthHD + transitionLength,radiusBypass,0],[lengthHD + transitionLength,radiusBypass + heightHD,0],[lengthHD,radiusBypass+heightHD,0]]
+    f = cb.Face(points)
+    w = cb.Wedge(f,ang)
+
+    w.chop(0,start_size=xCellNozel,end_size=xCellNozel * transitionStretching)
+    w.chop(1,start_size=ySizeBypass)
+
+    shapes.append(w)
+
+    points = [[lengthHD,radiusBypass + heightHD,0],[lengthHD + transitionLength,radiusBypass + heightHD,0],[lengthHD + transitionLength,radiusBypass + heightHD + heightSponge,0],[lengthHD,radiusBypass + heightHD + heightSponge,0]]
+    f = cb.Face(points)
+    w = cb.Wedge(f,ang)
+
+    w.set_patch("back","mantel")
+
+    w.chop(0,start_size=xCellNozel,end_size=xCellNozel * transitionStretching)
+    w.chop(1,start_size=ySizeBypass,c2c_expansion=yExpansion)
+
+    shapes.append(w)
+
+    #creating the end sponge
+    points = [[lengthHD + transitionLength,0,0],[lengthHD + transitionLength + endSpongeLength,0,0],[lengthHD + transitionLength + endSpongeLength,radiusCore,0],[lengthHD + transitionLength,radiusCore,0]]
+    f = cb.Face(points)
+    w = cb.Wedge(f,ang)
+
+    w.chop(0,start_size=xCellNozel * transitionStretching)
+    w.chop(1,count=y_count_core)
+
+    shapes.append(w)
+
+    points=[[lengthHD + transitionLength,radiusCore,0],[lengthHD+transitionLength+endSpongeLength,radiusCore,0],[lengthHD+transitionLength+endSpongeLength,radiusBypass,0],[lengthHD+transitionLength,radiusBypass,0]]
+    f = cb.Face(points)
+    w = cb.Wedge(f,ang)
+
+    w.chop(0,start_size=xCellNozel * transitionStretching)
+    w.chop(1,start_size=ySizeBypass)
+
+    shapes.append(w)
+
+    points = [[lengthHD + transitionLength,radiusBypass,0],[lengthHD + transitionLength+endSpongeLength,radiusBypass,0],[lengthHD + transitionLength+endSpongeLength,radiusBypass + heightHD,0],[lengthHD+transitionLength,radiusBypass+heightHD,0]]
+    f = cb.Face(points)
+    w = cb.Wedge(f,ang)
+
+    w.chop(0,start_size = xCellNozel * transitionStretching)
+    w.chop(1,start_size=ySizeBypass)
+
+    shapes.append(w)
+
+    points = [[lengthHD+transitionLength,radiusBypass + heightHD,0],[lengthHD + transitionLength + endSpongeLength,radiusBypass + heightHD,0],[lengthHD + transitionLength + endSpongeLength,radiusBypass + heightHD + heightSponge,0],[lengthHD + transitionLength,radiusBypass + heightHD + heightSponge,0]]
+    f = cb.Face(points)
+    w = cb.Wedge(f,ang)
+
+    w.set_patch("back","mantel")
+
+    w.chop(0,start_size=xCellNozel * transitionStretching)
+    w.chop(1,start_size=ySizeBypass,c2c_expansion=yExpansion)
+
+    shapes.append(w)
+
+    # add everything to mesh
+    mesh = cb.Mesh()
+    for shape in shapes:
+        mesh.add(shape)
+
+
+    #set the type of empty patches
+
+
+    mesh.patch_list.modify("wedge_back","wedge")
+    mesh.patch_list.modify("wedge_front","wedge")
+    mesh.patch_list.modify("nozzle","wall")
+
+    if(mantelIsWall):
+        mesh.patch_list.modify("mantel","wall")
+
+    #debugging mode 
+
+    mesh.set_default_patch("farField","patch")
+
+    #mesh.write(file_path + "/system/blockMeshDict", "debug.vtk")
+    mesh.write(file_path + "/system/blockMeshDict")
+
