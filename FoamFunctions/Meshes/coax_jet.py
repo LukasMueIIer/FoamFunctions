@@ -362,7 +362,7 @@ def piped_double_stacked_wedge_mesh(directory,ri,ra,l,l_pipe,spread_angle,x_coun
     #mesh.write(file_path + "/system/blockMeshDict", "debug.vtk")
     mesh.write(file_path + "/system/blockMeshDict")
 
-def full_rotational_mesh(directory,ri,ra,l,l_pipe,spread_angle,x_count,y_count,exp_Inlet,exp_Farfield,x_decay):
+def full_rotational_mesh(directory,ri,ra,l,l_pipe,spread_angle,x_count,y_count,exp_Inlet,exp_Farfield,x_decay,createMantel = False, mantelIsWall = False):
     file_path = directory
     #buildup
     shapes = []
@@ -414,11 +414,15 @@ def full_rotational_mesh(directory,ri,ra,l,l_pipe,spread_angle,x_count,y_count,e
     #outflow_ring.chop_axial(start_size = x_size,c2c_expansion = x_decay)
     outflow_ring.chop_radial(start_size = y_size, c2c_expansion = exp_Farfield)
     #outflow_ring.chop_tangential(start_size = y_size)
+    if(createMantel):
+        outflow_ring.set_outer_patch("mantel")
 
     shapes.append(outflow_ring)
 
     pip_hd_mantel = cb.ExtrudedRing.chain(outflow_ring, -1 * x_ext, start_face=True)
     pip_hd_mantel.chop_axial(start_size = x_size)
+    if(createMantel):
+        pip_hd_mantel.set_outer_patch("mantel")
     shapes.append(pip_hd_mantel)
 
     pipe_buffer = cb.ExtrudedRing.chain(hd_pipe,l_pipe + x_ext)
@@ -428,6 +432,8 @@ def full_rotational_mesh(directory,ri,ra,l,l_pipe,spread_angle,x_count,y_count,e
 
     Inflow_Buffer = cb.ExtrudedRing.chain(pip_hd_mantel,l_pipe + x_ext)
     Inflow_Buffer.chop_axial(start_size = x_size, c2c_expansion = exp_Inlet)
+    if(createMantel):
+        Inflow_Buffer.set_outer_patch("mantel")
     shapes.append(Inflow_Buffer)
 
     # add everything to mesh
@@ -438,6 +444,10 @@ def full_rotational_mesh(directory,ri,ra,l,l_pipe,spread_angle,x_count,y_count,e
     #set the type of empty patches
 
     mesh.patch_list.modify("pipe","wall")
+
+    if(mantelIsWall and createMantel):
+        mesh.patch_list.modify("mantel","wall")
+
     #debugging mode 
     mesh.write(file_path + "/system/blockMeshDict", "debug.vtk")
     #mesh.write(file_path + "/system/blockMeshDict")
