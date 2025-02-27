@@ -1,3 +1,4 @@
 *.pyc
 FoamFunctions/Tools/__pycache__/general.cpython-310.pyc
 !/Templates
+*.egg-info
