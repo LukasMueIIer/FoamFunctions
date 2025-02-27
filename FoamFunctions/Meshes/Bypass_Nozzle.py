@@ -373,7 +373,7 @@ class swallowingBlocks:
     
 
 class swallowingBlocksExpanding:
-    def __init__(self,id,bottomRighCorner,upperLeftCorner,ang,subsections,yStartSize,yExpansionRatio,xStartSize,expansionPerSection,reductionPerStep):
+    def __init__(self,id,bottomRighCorner,upperLeftCorner,ang,subsections,yStartSize,yExpansionRatio,xStartSize,expansionPerSection,reductionPerStep,mantelIsWall = False):
         self.id = id
         self.deltaX = upperLeftCorner[0] - bottomRighCorner[0]
         self.deltaY = upperLeftCorner[1] - bottomRighCorner[1]
@@ -473,6 +473,10 @@ class swallowingBlocksExpanding:
         #turns the Front into a slave patch for merging
         self.frontName = "slaveFront" + str(self.id)
         self.shapes[0].set_patch("left",self.frontName)
+
+    def setPatches(self,pathIdentifier,pathName):
+        for shape in self.shapes:
+            shape.set_patch(pathIdentifier,pathName)
     
 
 
@@ -501,7 +505,7 @@ def playground(file_path):
 
 
 def cascadedBypass(file_path,radiusCore,radiusBypass,lengthCore,lengthBypass,lengthHD,heightHD,aspectRatio,y_count_core,lengthSponge,
-                   heightSponge, sectionsSponge,expansionPerSection,reductionPerStep = 2,yExpansion = 1, xExpansionInlet = 1):
+                   heightSponge, sectionsSponge,expansionPerSection,reductionPerStep = 2,yExpansion = 1, xExpansionInlet = 1, mantelIsWall = False):
     
     #Geometry
     #radiusCore, absolute radius of the Core Nozzel
@@ -611,6 +615,7 @@ def cascadedBypass(file_path,radiusCore,radiusBypass,lengthCore,lengthBypass,len
 
     #The Inlet Double sponge
     spongeDouble = swallowingBlocksExpanding(3,[lengthHD,radiusBypass + heightHD,0],[lengthHD + lengthSponge,radiusBypass + heightHD + heightSponge,0],ang,sectionsSponge,ySizeBP,yExpansion,xCellNozel,expansionPerSection,reductionPerStep)
+    spongeDouble.setPatches("back","mantel")
 
     #The Manual Bock At the inlet with constant x Still
     points = [[-lengthCore,radiusBypass+heightHD,0],[0,radiusBypass+heightHD,0],[0,radiusBypass+heightHD+heightSponge,0],[-lengthCore,radiusBypass+heightHD+heightSponge,0]]
@@ -620,6 +625,8 @@ def cascadedBypass(file_path,radiusCore,radiusBypass,lengthCore,lengthBypass,len
     wedge.chop(0,start_size=xSizeBypass)
     wedge.chop(1,start_size=ySizeBP, c2c_expansion=yExpansion)
 
+    wedge.set_patch("back","mantel")
+
     shapes.append(wedge)
 
     points = [[0,radiusBypass + heightHD,0],[lengthHD,radiusBypass + heightHD,0],[lengthHD,radiusBypass + heightHD + heightSponge,0],[0,radiusBypass + heightHD + heightSponge,0]]
@@ -627,6 +634,8 @@ def cascadedBypass(file_path,radiusCore,radiusBypass,lengthCore,lengthBypass,len
     wedge = cb.Wedge(face,ang)
     wedge.chop(0,start_size=xCellNozel)
     wedge.chop(1,start_size=ySizeBP, c2c_expansion=yExpansion)
+
+    wedge.set_patch("back","mantel")
 
     shapes.append(wedge)
 
@@ -637,6 +646,8 @@ def cascadedBypass(file_path,radiusCore,radiusBypass,lengthCore,lengthBypass,len
 
     wedge.chop(0,end_size=xSizeBypass, c2c_expansion= 1/xExpansionInlet)
     wedge.chop(1,count=ySizeBP,c2c_expansion=yExpansion)
+
+    wedge.set_patch("back","mantel")
 
     shapes.append(wedge)
 
@@ -685,6 +696,10 @@ def cascadedBypass(file_path,radiusCore,radiusBypass,lengthCore,lengthBypass,len
     mesh.patch_list.modify("wedge_back","wedge")
     mesh.patch_list.modify("wedge_front","wedge")
     mesh.patch_list.modify("nozzle","wall")
+
+    if(mantelIsWall):
+        mesh.patch_list.modify("mantel","wall")
+
     #debugging mode 
 
     mesh.set_default_patch("farField","patch")
