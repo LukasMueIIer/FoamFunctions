@@ -362,6 +362,119 @@ def piped_double_stacked_wedge_mesh(directory,ri,ra,l,l_pipe,spread_angle,x_coun
     #mesh.write(file_path + "/system/blockMeshDict", "debug.vtk")
     mesh.write(file_path + "/system/blockMeshDict")
 
+def piped_double_stacked_wedge_mesh_walled(directory,ri,ra,l,l_pipe,spread_angle,x_count,y_count,exp_Inlet,exp_Farfield,x_decay):    #create a classical based mesh 
+    
+    file_path = directory
+
+    #buildup
+    shapes = []
+    ang = np.deg2rad(2)
+
+    x_size = l / (x_count)
+    y_size = ri / y_count
+    
+    points_inner = [[0,0,0],[l,0,0],[l,ri,0],[0,ri,0]]
+    face_inner = cb.Face(points_inner)
+    wedge_inner = cb.Wedge(face_inner,angle=ang)
+    
+    wedge_inner.set_patch("left","inlet_inner")
+    wedge_inner.set_patch("right","outlet")
+
+    wedge_inner.chop(0,start_size=x_size,c2c_expansion= x_decay)
+    wedge_inner.chop(1,count=y_count)
+
+    shapes.append(wedge_inner)
+
+
+    #the high deff area surrounding the pipe part, it extends up 1/4 the pipe length (approximatley)
+    #calc the approximation distance
+    x_target = 0.25 * l_pipe
+    y_target = l * np.tan(np.deg2rad(spread_angle))
+
+    x_size = l / (x_count)
+    y_size = ri / y_count
+
+    x_ext_count = np.rint(x_target / x_size)
+    y_ext_count = np.rint(y_target / y_size)
+
+    x_ext = -1 * x_ext_count * x_size
+    y_ext = y_ext_count * y_size
+
+    points_buffer_inner = [[0,ri,0],[l,ri ,0],[l,ri + y_ext ,0],[0,ri + y_ext,0]]
+    face_buffer_inner = cb.Face(points_buffer_inner)
+    wedge_buffer_inner = cb.Wedge(face_buffer_inner,angle=ang)
+
+    wedge_buffer_inner.set_patch("right","outlet")
+    wedge_buffer_inner.chop(0, start_size=x_size, c2c_expansion=x_decay)
+    wedge_buffer_inner.chop(1,count = y_ext_count)
+    shapes.append(wedge_buffer_inner)
+
+
+    #Cut it in two, for the patches
+    points_buffer_inner = [[x_ext,ri,0],[0,ri ,0],[0,ri + y_ext ,0],[x_ext,ri + y_ext,0]]
+    face_pipe_buffer = cb.Face(points_buffer_inner)
+    wedge_pipe_buffer = cb.Wedge(face_pipe_buffer)
+
+    wedge_pipe_buffer.chop(0,count=x_ext_count)
+    wedge_pipe_buffer.chop(1,count=y_ext_count)
+    shapes.append(wedge_pipe_buffer)
+
+
+    #Circular part, that goes up towards the far field
+    points_buffer_outer = [[0,ri + y_ext,0],[l,ri + y_ext,0],[l,ra,0],[0,ra,0]]
+    face_buffer_outer = cb.Face(points_buffer_outer)
+    wedge_buffer_outer = cb.Wedge(face_buffer_outer,angle=ang)
+
+    wedge_buffer_outer.set_patch("right","outlet")
+    wedge_buffer_outer.chop(0,start_size=x_size, c2c_expansion=x_decay)
+    wedge_buffer_outer.chop(1,start_size=y_size,c2c_expansion=exp_Farfield)
+    shapes.append(wedge_buffer_outer)
+
+
+    points_buffer_outer = [[x_ext,ri + y_ext,0],[0,ri + y_ext,0],[0,ra,0],[x_ext,ra,0]]
+    face_buffer_outer = cb.Face(points_buffer_outer)
+    wedge_buffer_outer = cb.Wedge(face_buffer_outer,angle=ang)
+
+    wedge_buffer_outer.chop(0,count=x_ext_count)
+    wedge_buffer_outer.chop(1,start_size=y_size,c2c_expansion=exp_Farfield)
+    shapes.append(wedge_buffer_outer)
+
+
+    #Part at the "Inlet where the mesh gets lees defined" in only x_direction
+    points_pipe_buffer = [[-1 * l_pipe,ri,0],[x_ext,ri,0],[x_ext,ri + y_ext,0],[-1 * l_pipe,ri + y_ext,0]]
+    face_pipe_buffer = cb.Face(points_pipe_buffer)
+    wedge_pipe_buffer = cb.Wedge(face_pipe_buffer)
+
+    wedge_pipe_buffer.set_patch("left","inlet_outer")
+    wedge_pipe_buffer.chop(0,end_size = x_size, c2c_expansion = 1 / exp_Inlet)
+    wedge_pipe_buffer.chop(1,start_size=y_size)
+    shapes.append(wedge_pipe_buffer)
+
+    #Part at the "Inlet where the mesh gets lees defined" in both directions
+    points_pipe_outer = [[-1 * l_pipe,ri + y_ext,0],[x_ext, ri + y_ext,0],[x_ext,ra,0],[-1 * l_pipe,ra,0]]
+    face_pipe_outer = cb.Face(points_pipe_outer)
+    wedge_pipe_outer = cb.Wedge(face_pipe_outer)
+
+    wedge_pipe_outer.set_patch("left","inlet_outer")
+    wedge_pipe_outer.chop(0,end_size = x_size, c2c_expansion = 1 / exp_Inlet)
+    wedge_pipe_outer.chop(1,start_size = y_size, c2c_expansion = exp_Farfield)
+    shapes.append(wedge_pipe_outer)
+
+    # add everything to mesh
+    mesh = cb.Mesh()
+    for shape in shapes:
+        mesh.add(shape)
+
+    mesh.set_default_patch("pipe","wall")
+
+    #set the type of empty patches
+    mesh.patch_list.modify("wedge_back","wedge")
+    mesh.patch_list.modify("wedge_front","wedge")
+
+    #debugging mode 
+    #mesh.write(file_path + "/system/blockMeshDict", "debug.vtk")
+    mesh.write(file_path + "/system/blockMeshDict")
+
 def full_rotational_mesh(directory,ri,ra,l,l_pipe,spread_angle,x_count,y_count,exp_Inlet,exp_Farfield,x_decay,createMantel = False, mantelIsWall = False):
     file_path = directory
     #buildup
