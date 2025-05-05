@@ -27,6 +27,10 @@ Structured Mesh for a coaxial Jet, wedge is for a cylindical case and flat for a
 ### Line
 a straight line to do 1D simulation, mesh has 2 empty directions
 
+### SectionallySnappedPipe
+Meshing setup to simulate "objects" that are located inside of a pipe, the Objects are snapped with snappyHexMesh.
+Therefore where the Objects are the aspect ratio of the blocks is held at 1
+
 ## Tools
 ### Data Readers
 Functions to extract data from files that are created by OpenFoam. This data can then be used for further processing in python

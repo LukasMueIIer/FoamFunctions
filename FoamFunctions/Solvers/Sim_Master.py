@@ -6,14 +6,14 @@ from PyFoam.Execution.BasicRunner import BasicRunner
 import time
 
 class sim_step:
-    def __init__(self,solver,time = 1, writeInterval = 1, dT = 1, silent=True, ddTSchemes = None) -> None:
+    def __init__(self,solver,time = 1, writeInterval = 1, dT = 1, silent=True, ddTSchemes = None, additionalArgs = []) -> None:
         self.time = time #timeframe which is simulated
         self.writeInterval = writeInterval #at what interval results are written
         self.dT = dT    #timestep size (or initial size if addaptive timestep)
         self.solver = solver #String which matches the Foam Command to execute the solver
         self.silent = silent #If solver output is shown in console
         self.ddTSchemes = ddTSchemes    #to swap between time schemes before execution
-        
+        self.additionalArgs = additionalArgs
 
     def inverval_splitting(self,n): #sets the writeInterval, so that n files are written
         self.writeInterval = self.time / n
@@ -60,7 +60,9 @@ class sim_master:
         #run solver and measure time
         start_time = time.time()
         print("Executing " + sim.solver)
-        runner = BasicRunner(argv=[sim.solver, "-case", self.dir_path], silent= sim.silent, lam=self.lam)
+        args = [sim.solver, "-case", self.dir_path]
+        args.extend(sim.additionalArgs)
+        runner = BasicRunner(argv=args, silent= sim.silent, lam=self.lam)
         runner.start()
         if runner.runOK():
             print(sim.solver + " ran successfully")
