@@ -303,3 +303,34 @@ def copy_field_files(target_directory, source_directory, file_list, overwrite=Fa
             print(f"Copied file: {file_name} to {target_directory}")
         else:
             print(f"File already exists and overwrite is set to False: {file_name}")
+
+#Remove all Processor Directories, and decompose again
+def delete_processor_folders(directory_path):
+    """
+    Deletes all folders that start with "processor" in the specified directory.
+
+    Parameters:
+        directory_path (str): Path to the directory where folders will be deleted.
+
+    Returns:
+        None
+    """
+    try:
+        # Check if the provided directory path exists
+        if not os.path.exists(directory_path):
+            print(f"The directory {directory_path} does not exist.")
+            return
+
+        # Iterate through items in the directory
+        for item in os.listdir(directory_path):
+            item_path = os.path.join(directory_path, item)
+
+            # Check if the item is a folder and starts with "processor"
+            if os.path.isdir(item_path) and item.startswith("processor"):
+                print(f"Deleting folder: {item_path}")
+                shutil.rmtree(item_path)  # Delete the folder and its contents
+
+        print("Completed deletion of processor folders.")
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
