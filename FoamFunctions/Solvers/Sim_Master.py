@@ -73,6 +73,14 @@ class sim_master:
         
         #save information
         self.solverExecutionTimes.append(exec_time)
+
+    def manualExecute(self,args,silent=False):
+        runner = BasicRunner(argv=args, silent= silent, lam=self.lam)
+        runner.start()
+        if runner.runOK():
+            print(" ran successfully")
+        else:
+            print(" failed for case")
         
 
 

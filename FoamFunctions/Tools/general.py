@@ -134,9 +134,12 @@ def decompose(dir_path,core_count,silent=True,copyZero = False):    #basic case 
     else:
         print("decomposePar failed.")
 
-def reconstruct(dir_path,silent=True):  #basic reconstruction of a parallel case
+def reconstruct(dir_path,silent=True,withZero = False):  #basic reconstruction of a parallel case
     print("Reconstructing the Mesh")
-    reconstruct_runner = BasicRunner(argv=["reconstructParMesh", "-case", dir_path], silent=False)
+    if(withZero):
+        reconstruct_runner = BasicRunner(argv=["reconstructParMesh", "-case", dir_path,"-withZero"], silent=False)
+    else:
+        reconstruct_runner = BasicRunner(argv=["reconstructParMesh", "-case", dir_path], silent=False)
     reconstruct_runner.start()
     if reconstruct_runner.runOK():
         print("reconstructParMesh ran successfully")
@@ -199,6 +202,17 @@ def run_setExprFields(dir_path,silent=True,exclude_0 = True): #basic setExprFiel
         print(f"setExprFields ran successfully")
     else:
         print(f"setExprFields failed for case")
+
+def run_setFields(dir_path,silent=True,exclude_0 = True): #basic setExprFields execution with no addons
+    #exclude_0 means that the 0 timestep will not be overwritten
+    EF_runner = BasicRunner(argv=["setFields","-case",dir_path],silent=silent)
+    if(exclude_0):
+        EF_runner = BasicRunner(argv=["setFields","-case",dir_path,"-noZero"],silent=silent)
+    EF_runner.start()
+    if EF_runner.runOK():
+        print(f"setFields ran successfully")
+    else:
+        print(f"setFields failed for case")
 
 def remove_PyFoam_Logs(dir_path): #removes all files that start with "PyFoam" in the top level off dir path
     # List all files in the top-level of dir_path
